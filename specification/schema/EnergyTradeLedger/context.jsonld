@@ -1,0 +1,112 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "schema": "https://schema.org/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "owl": "http://www.w3.org/2002/07/owl#",
+    "qudt": "http://qudt.org/vocab/unit/",
+    "deg": "./vocab.jsonld#",
+
+    "LedgerRecord": "deg:LedgerRecord",
+    "TradeDetail": "deg:TradeDetail",
+    "ValidationMetric": "deg:ValidationMetric",
+
+    "recordId": "deg:recordId",
+    "transactionId": "deg:transactionId",
+    "orderItemId": "deg:orderItemId",
+    "creationTime": "schema:dateCreated",
+    "tradeTime": "deg:tradeTime",
+    "deliveryStartTime": "deg:deliveryStartTime",
+    "deliveryEndTime": "deg:deliveryEndTime",
+
+    "platformIdBuyer": "deg:platformIdBuyer",
+    "platformIdSeller": "deg:platformIdSeller",
+    "discomIdBuyer": "deg:discomIdBuyer",
+    "discomIdSeller": "deg:discomIdSeller",
+    "buyerId": "deg:buyerId",
+    "sellerId": "deg:sellerId",
+
+    "tradeDetails": "deg:tradeDetails",
+    "tradeType": {
+      "@id": "deg:tradeType",
+      "@type": "@id",
+      "@context": {
+        "ENERGY": "deg:TradeTypeEnergy",
+        "RAISE_CAPACITY": "deg:TradeTypeRaiseCapacity",
+        "LOWER_CAPACITY": "deg:TradeTypeLowerCapacity",
+        "PFR": "deg:TradeTypePFR",
+        "SFR": "deg:TradeTypeSFR",
+        "TC": "deg:TradeTypeTC",
+        "BDR": "deg:TradeTypeBDR"
+      }
+    },
+    "tradeQty": "deg:tradeQty",
+    "tradeUnit": {
+      "@id": "deg:tradeUnit",
+      "@type": "@id",
+      "@context": {
+        "KWH": "qudt:KiloW-HR",
+        "KW": "qudt:KiloW"
+      }
+    },
+
+    "buyerFulfillmentValidationMetrics": "deg:buyerFulfillmentValidationMetrics",
+    "sellerFulfillmentValidationMetrics": "deg:sellerFulfillmentValidationMetrics",
+    "validationMetricType": {
+      "@id": "deg:validationMetricType",
+      "@type": "@id",
+      "@context": {
+        "ACTUAL_PUSHED": "deg:MetricActualPushed",
+        "ACTUAL_PULLED": "deg:MetricActualPulled",
+        "SETPOINT_FOLLOWING_ERROR": "deg:MetricSetpointFollowingError",
+        "ACTUAL_RAISE_CAPACITY": "deg:MetricActualRaiseCapacity",
+        "ACTUAL_LOWER_CAPACITY": "deg:MetricActualLowerCapacity",
+        "FREQUENCY_RESPONSE_ERROR": "deg:MetricFrequencyResponseError",
+        "ACTUAL_DEMAND_REDUCTION": "deg:MetricActualDemandReduction",
+        "AVAILABILITY": "deg:MetricAvailability"
+      }
+    },
+    "validationMetricValue": "deg:validationMetricValue",
+
+    "statusBuyerDiscom": {
+      "@id": "deg:statusBuyerDiscom",
+      "@type": "@id"
+    },
+    "statusSellerDiscom": {
+      "@id": "deg:statusSellerDiscom",
+      "@type": "@id"
+    },
+    "tradeStatus": {
+      "@id": "deg:tradeStatus",
+      "@type": "@id",
+      "@context": {
+        "PENDING": "deg:TradeStatusPending",
+        "CONFIRMED": "deg:TradeStatusConfirmed",
+        "CANCELLED_OUTAGE": "deg:TradeStatusCancelledOutage",
+        "CANCELLED_POL_VIOLATION": "deg:TradeStatusCancelledPolicyViolation",
+        "CURTAILED_OUTAGE": "deg:TradeStatusCurtailedOutage",
+        "CURTAILED_POL_VIOLATION": "deg:TradeStatusCurtailedPolicyViolation",
+        "COMPLETED": "deg:TradeStatusCompleted"
+      }
+    },
+
+    "role": {
+      "@id": "deg:role",
+      "@type": "@id",
+      "@context": {
+        "BUYER": "deg:RoleBuyer",
+        "SELLER": "deg:RoleSeller",
+        "BUYER_DISCOM": "deg:RoleBuyerDiscom",
+        "SELLER_DISCOM": "deg:RoleSellerDiscom"
+      }
+    },
+
+    "rowDigest": "deg:rowDigest",
+    "clientReference": "deg:clientReference",
+    "note": "deg:note"
+  },
+
+  "@graph": []
+}

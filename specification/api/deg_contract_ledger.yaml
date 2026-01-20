@@ -1,9 +1,17 @@
-openapi: 3.1.0
+openapi: 3.1.1
 info:
   title: DEG Ledger Service API
   version: 0.3.0
+  x-schema-pack: ../schema/EnergyTradeLedger/
+  x-jsonld-context: ../schema/EnergyTradeLedger/context.jsonld
+  x-jsonld-vocab: ../schema/EnergyTradeLedger/vocab.jsonld
   description: |
     DEG Ledger Service stores an immutable, multi-party ledger view of a DEG trade lifecycle.
+
+    ## Schema and JSON-LD
+    - **Attributes schema:** `../schema/EnergyTradeLedger/attributes.yaml`
+    - **JSON-LD context:** `../schema/EnergyTradeLedger/context.jsonld`
+    - **JSON-LD vocabulary:** `../schema/EnergyTradeLedger/vocab.jsonld`
 
     ## API usage notes (when to use which API)
 
@@ -75,11 +83,12 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ledgerPutRequest"
+              $ref: "#/components/schemas/LedgerPutRequest"
             examples:
               buyerPlatformCreate:
                 summary: Buyer platform creates record and writes core trade metadata
                 value:
+                  "@context": "../schema/EnergyTradeLedger/context.jsonld"
                   role: BUYER
                   transactionId: "tx-123"
                   orderItemId: "item-1"
@@ -103,7 +112,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ledgerWriteResponse"
+                $ref: "#/components/schemas/LedgerWriteResponse"
               examples:
                 ok:
                   value:
@@ -117,7 +126,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
               examples:
                 schemaError:
                   value:
@@ -131,7 +140,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
               examples:
                 badSig:
                   value:
@@ -142,7 +151,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
               examples:
                 pol:
                   value:
@@ -153,7 +162,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
 
   /ledger/get:
     post:
@@ -177,7 +186,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ledgerGetRequest"
+              $ref: "#/components/schemas/LedgerGetRequest"
             examples:
               byUniqueKey:
                 summary: Fetch a specific record by uniqueness key
@@ -198,7 +207,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ledgerGetResponse"
+                $ref: "#/components/schemas/LedgerGetResponse"
               examples:
                 empty:
                   value:
@@ -209,19 +218,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
         "401":
           description: Authentication/signature failure
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
         "403":
           description: Authorization/policy failure (caller not allowed)
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
 
   /ledger/record:
     post:
@@ -258,11 +267,12 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ledgerRecordRequest"
+              $ref: "#/components/schemas/LedgerRecordRequest"
             examples:
               buyerDiscomCompleted:
                 summary: Buyer discom records actual pulled and marks completed
                 value:
+                  "@context": "../schema/EnergyTradeLedger/context.jsonld"
                   role: BUYER_DISCOM
                   transactionId: "tx-123"
                   orderItemId: "item-1"
@@ -274,6 +284,7 @@ paths:
               sellerDiscomCancelOutage:
                 summary: Seller discom cancels due to outage
                 value:
+                  "@context": "../schema/EnergyTradeLedger/context.jsonld"
                   role: SELLER_DISCOM
                   transactionId: "tx-123"
                   orderItemId: "item-1"
@@ -286,35 +297,35 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ledgerWriteResponse"
+                $ref: "#/components/schemas/LedgerWriteResponse"
         "400":
           description: Invalid request (schema/validation)
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
         "401":
           description: Authentication/signature failure
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
         "403":
           description: Authorization/policy failure (caller not allowed)
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
         "404":
           description: Target record not found for the provided identifiers
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/error"
+                $ref: "#/components/schemas/Error"
               examples:
                 notFound:
                   value:
-                    code: NOT_FOUND
+                    code: PRC_NOT_FOUND
                     message: "No ledger record found for transactionId=tx-123 and orderItemId=item-1"
 
 components:
@@ -347,162 +358,52 @@ components:
         - Hash algorithm and canonicalization follow network policy.
 
   schemas:
-    # -------------------------
-    # Enums
-    # -------------------------
-    role:
-      type: string
-      enum: [BUYER, SELLER, BUYER_DISCOM, SELLER_DISCOM]
+    # =========================================================================
+    # DOMAIN TYPES — Reference from attributes.yaml
+    # =========================================================================
 
-    discomRole:
+    # Core domain types (imported from schema pack)
+    LedgerRecord:
+      $ref: "../schema/EnergyTradeLedger/attributes.yaml#/components/schemas/LedgerRecord"
+
+    TradeDetail:
+      $ref: "../schema/EnergyTradeLedger/attributes.yaml#/components/schemas/TradeDetail"
+
+    ValidationMetric:
+      $ref: "../schema/EnergyTradeLedger/attributes.yaml#/components/schemas/ValidationMetric"
+
+    # Enumerations (imported from schema pack)
+    LedgerRole:
+      $ref: "../schema/EnergyTradeLedger/attributes.yaml#/components/schemas/LedgerRole"
+
+    DiscomRole:
       type: string
       enum: [BUYER_DISCOM, SELLER_DISCOM]
+      description: Subset of LedgerRole for discom-only operations.
+      x-jsonld: { "@id": "role" }
 
-    tradeType:
-      type: string
-      enum: [ENERGY, RAISE_CAPACITY, LOWER_CAPACITY, PFR, SFR, TC, BDR]
+    TradeType:
+      $ref: "../schema/EnergyTradeLedger/attributes.yaml#/components/schemas/TradeType"
 
-    metricType:
-      type: string
-      enum:
-        - ACTUAL_PUSHED
-        - ACTUAL_PULLED
-        - SETPOINT_FOLLOWING_ERROR
-        - ACTUAL_RAISE_CAPACITY
-        - ACTUAL_LOWER_CAPACITY
-        - FREQUENCY_RESPONSE_ERROR
-        - ACTUAL_DEMAND_REDUCTION
-        - AVAILABILITY
+    TradeUnit:
+      $ref: "../schema/EnergyTradeLedger/attributes.yaml#/components/schemas/TradeUnit"
 
-    tradeStatus:
-      type: string
-      enum:
-        - PENDING
-        - CONFIRMED
-        - CANCELLED_OUTAGE
-        - CANCELLED_POL_VIOLATION
-        - CURTAILED_OUTAGE
-        - CURTAILED_POL_VIOLATION
-        - COMPLETED
+    MetricType:
+      $ref: "../schema/EnergyTradeLedger/attributes.yaml#/components/schemas/MetricType"
 
-    tradeUnit:
-      type: string
-      enum: [KWH, KW]
+    TradeStatus:
+      $ref: "../schema/EnergyTradeLedger/attributes.yaml#/components/schemas/TradeStatus"
 
-    # -------------------------
-    # Value objects
-    # -------------------------
-    tradeDetail:
-      type: object
-      additionalProperties: false
-      required: [tradeQty, tradeType, tradeUnit]
-      properties:
-        tradeQty:
-          type: number
-        tradeType:
-          $ref: "#/components/schemas/tradeType"
-        tradeUnit:
-          $ref: "#/components/schemas/tradeUnit"
+    # =========================================================================
+    # API REQUEST/RESPONSE TYPES
+    # =========================================================================
 
-    validationMetric:
-      type: object
-      additionalProperties: false
-      required: [validationMetricType, validationMetricValue]
-      properties:
-        validationMetricType:
-          $ref: "#/components/schemas/metricType"
-        validationMetricValue:
-          type: number
-
-    # -------------------------
-    # Canonical stored record
-    # -------------------------
-    ledgerRecord:
-      type: object
-      description: Canonical ledger record as stored and returned by the service.
-      additionalProperties: false
-      required:
-        - creationTime
-        - recordId
-        - transactionId
-        - orderItemId
-        - platformIdBuyer
-        - platformIdSeller
-        - discomIdBuyer
-        - discomIdSeller
-        - buyerId
-        - sellerId
-      properties:
-        creationTime:
-          type: string
-          format: date-time
-          description: Timestamp when the record was created (generated by ledger)
-        recordId:
-          type: string
-          description: Unique record identifier (generated by ledger)
-        transactionId:
-          type: string
-          description: Beckn transaction identifier (part of uniqueness key)
-        orderItemId:
-          type: string
-          description: Order item identifier (part of uniqueness key)
-        platformIdBuyer:
-          type: string
-          description: Identifier of buyer platform
-        platformIdSeller:
-          type: string
-          description: Identifier of seller platform
-        discomIdBuyer:
-          type: string
-          description: Buyer-side discom identifier
-        discomIdSeller:
-          type: string
-          description: Seller-side discom identifier
-        buyerId:
-          type: string
-          description: Unique buyer identifier (e.g., CA number / utility assigned id)
-        sellerId:
-          type: string
-          description: Unique seller identifier (e.g., DER / prosumer id)
-        tradeTime:
-          type: string
-          format: date-time
-          description: Timestamp when the trade was agreed upon
-        deliveryStartTime:
-          type: string
-          format: date-time
-          description: Timestamp when delivery started
-        deliveryEndTime:
-          type: string
-          format: date-time
-          description: Timestamp when delivery ended
-        tradeDetails:
-          type: array
-          items:
-            $ref: "#/components/schemas/tradeDetail"
-        buyerFulfillmentValidationMetrics:
-          type: array
-          items:
-            $ref: "#/components/schemas/validationMetric"
-        sellerFulfillmentValidationMetrics:
-          type: array
-          items:
-            $ref: "#/components/schemas/validationMetric"
-        statusBuyerDiscom:
-          $ref: "#/components/schemas/tradeStatus"
-        statusSellerDiscom:
-          $ref: "#/components/schemas/tradeStatus"
-        rowDigest:
-          type: string
-          description: Digest of the canonical row state (implementation-specific)
-
-    # -------------------------
-    # Requests / Responses
-    # -------------------------
-    ledgerPutRequest:
+    LedgerPutRequest:
       type: object
       additionalProperties: false
       required: [role, transactionId, orderItemId]
+      x-jsonld:
+        "@context": "../schema/EnergyTradeLedger/context.jsonld"
       description: |
         Partial-write request for creating or updating a ledger record.
 
@@ -512,45 +413,62 @@ components:
         - Server enforces role-based write permissions.
         - Discoms MUST NOT call this endpoint (use /ledger/record).
       properties:
+        "@context":
+          type: string
+          description: Optional JSON-LD context URL.
         role:
-          $ref: "#/components/schemas/role"
+          $ref: "#/components/schemas/LedgerRole"
         transactionId:
           type: string
+          x-jsonld: { "@id": "transactionId" }
         orderItemId:
           type: string
+          x-jsonld: { "@id": "orderItemId" }
         recordId:
           type: string
           description: Optional alternate reference; uniqueness key still applies.
+          x-jsonld: { "@id": "recordId" }
         platformIdBuyer:
           type: string
+          x-jsonld: { "@id": "platformIdBuyer" }
         platformIdSeller:
           type: string
+          x-jsonld: { "@id": "platformIdSeller" }
         discomIdBuyer:
           type: string
+          x-jsonld: { "@id": "discomIdBuyer" }
         discomIdSeller:
           type: string
+          x-jsonld: { "@id": "discomIdSeller" }
         buyerId:
           type: string
+          x-jsonld: { "@id": "buyerId" }
         sellerId:
           type: string
+          x-jsonld: { "@id": "sellerId" }
         tradeTime:
           type: string
           format: date-time
+          x-jsonld: { "@id": "tradeTime" }
         deliveryStartTime:
           type: string
           format: date-time
+          x-jsonld: { "@id": "deliveryStartTime" }
         deliveryEndTime:
           type: string
           format: date-time
+          x-jsonld: { "@id": "deliveryEndTime" }
         tradeDetails:
           type: array
           items:
-            $ref: "#/components/schemas/tradeDetail"
+            $ref: "#/components/schemas/TradeDetail"
+          x-jsonld: { "@id": "tradeDetails" }
         clientReference:
           type: string
           description: Optional idempotency token generated by the platform for safe retries.
+          x-jsonld: { "@id": "clientReference" }
 
-    ledgerGetRequest:
+    LedgerGetRequest:
       type: object
       additionalProperties: false
       description: |
@@ -619,23 +537,30 @@ components:
           enum: [asc, desc]
           default: desc
 
-    ledgerGetResponse:
+    LedgerGetResponse:
       type: object
       additionalProperties: false
       required: [records, count]
+      x-jsonld:
+        "@context": "../schema/EnergyTradeLedger/context.jsonld"
       properties:
+        "@context":
+          type: string
+          description: JSON-LD context URL.
         records:
           type: array
           items:
-            $ref: "#/components/schemas/ledgerRecord"
+            $ref: "#/components/schemas/LedgerRecord"
         count:
           type: integer
           description: Number of records returned in this page
 
-    ledgerRecordRequest:
+    LedgerRecordRequest:
       type: object
       additionalProperties: false
       required: [role]
+      x-jsonld:
+        "@context": "../schema/EnergyTradeLedger/context.jsonld"
       description: |
         Discom recording request for an existing record.
 
@@ -647,54 +572,72 @@ components:
         - Server enforces role-based write permissions.
         - If the target record does not exist, server returns 404.
       properties:
+        "@context":
+          type: string
+          description: Optional JSON-LD context URL.
         role:
-          $ref: "#/components/schemas/discomRole"
+          $ref: "#/components/schemas/DiscomRole"
         transactionId:
           type: string
+          x-jsonld: { "@id": "transactionId" }
         orderItemId:
           type: string
+          x-jsonld: { "@id": "orderItemId" }
         recordId:
           type: string
+          x-jsonld: { "@id": "recordId" }
         buyerFulfillmentValidationMetrics:
           type: array
           items:
-            $ref: "#/components/schemas/validationMetric"
+            $ref: "#/components/schemas/ValidationMetric"
+          x-jsonld: { "@id": "buyerFulfillmentValidationMetrics" }
         sellerFulfillmentValidationMetrics:
           type: array
           items:
-            $ref: "#/components/schemas/validationMetric"
+            $ref: "#/components/schemas/ValidationMetric"
+          x-jsonld: { "@id": "sellerFulfillmentValidationMetrics" }
         statusBuyerDiscom:
-          $ref: "#/components/schemas/tradeStatus"
+          $ref: "#/components/schemas/TradeStatus"
+          x-jsonld: { "@id": "statusBuyerDiscom" }
         statusSellerDiscom:
-          $ref: "#/components/schemas/tradeStatus"
+          $ref: "#/components/schemas/TradeStatus"
+          x-jsonld: { "@id": "statusSellerDiscom" }
         note:
           type: string
+          x-jsonld: { "@id": "schema:description" }
         clientReference:
           type: string
           description: Optional idempotency token generated by the discom for safe retries.
+          x-jsonld: { "@id": "clientReference" }
 
-    ledgerWriteResponse:
+    LedgerWriteResponse:
       type: object
       additionalProperties: false
       required: [success, recordId, creationTime, rowDigest]
+      x-jsonld:
+        "@context": "../schema/EnergyTradeLedger/context.jsonld"
       properties:
         success:
           type: boolean
         recordId:
           type: string
+          x-jsonld: { "@id": "recordId" }
         creationTime:
           type: string
           format: date-time
+          x-jsonld: { "@id": "schema:dateCreated" }
         rowDigest:
           type: string
           description: Digest of the canonical row state after applying this write
+          x-jsonld: { "@id": "rowDigest" }
         message:
           type: string
 
-    # -------------------------
-    # Error
-    # -------------------------
-    error:
+    # =========================================================================
+    # ERROR TYPE
+    # =========================================================================
+
+    Error:
       type: object
       additionalProperties: false
       required: [code, message]
