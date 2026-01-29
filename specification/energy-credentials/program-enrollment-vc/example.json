@@ -12,6 +12,10 @@
     "licenseNumber": "REG-2025-00001"
   },
   "issuanceDate": "2025-01-13T11:00:00Z",
+  "credentialStatus": {
+    "id": "https://dedi.global/dedi/query/5HmKwpkCnLdpTEU8WHy4dy5K5mnbXMpqFZycEqpaQjFgwvfS:degcredentials/program-enrollment/7f8e9d0c-5678-1234-abcd-123456789abc",
+    "type": "dediregistry"
+  },
   "credentialSubject": {
     "id": "did:example:consumer:abc123",
     "consumerNumber": "UTIL-2025-001234567",
